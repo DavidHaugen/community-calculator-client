@@ -1,0 +1,34 @@
+#calculator-container{
+  margin: 200px auto 0 auto;;
+  width: 500px;
+  padding: 50px;
+  border: 1px solid lightblue;
+}
+
+#calculator-container:focus{
+  outline: none;
+}
+
+.flex{
+  display: flex;
+}
+
+button{
+  height: 80px;
+  width: 80px;
+  margin: 4px;
+}
+
+#display{
+  border: 1px black solid;
+  width: 340px;
+  height: 40px;
+  margin: 0 auto 5px auto;
+  padding-right: 10px;
+  text-align: right;
+  line-height: .5;
+}
+
+#clear{
+  width: 150px;
+}
