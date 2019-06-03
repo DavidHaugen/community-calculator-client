@@ -4,5 +4,9 @@
 
 .App {
   text-align: center;
+  display: flex;
+  height: 90vh;
+  align-items: center;
+  justify-content: space-around;
 }
 
