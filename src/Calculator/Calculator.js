@@ -1,8 +1,13 @@
 import React, {Component} from 'react';
 import './Calculator.css';
 import * as math from 'mathjs';
+import Context from '../Context';
+import io from 'socket.io-client';
+let socket;
 
 export default class Calculator extends Component{
+  static contextType = Context
+
   state = {
     display: '',
     error: '',
@@ -10,7 +15,28 @@ export default class Calculator extends Component{
   }
 
   componentDidMount(){
+    const mountContext = this.context;
     document.getElementById('calculator-container').focus();
+    socket = io('localhost:8000');
+    socket.on('new_calculation_blast', function(calculation) {
+      mountContext.setLog(calculation);
+    });
+    socket.on('test_reply', function(message) {
+      // logsService.insertlog
+      console.log('Got a reply');
+      console.log(message);
+    });
+    this.getLogs();
+  }
+
+  getLogs = () => {
+    return fetch('http://localhost:8000/api/logs')
+      .then(res => res.json())
+      .then(res => {
+        for(let i = 1; i <= res.length; i++){
+          this.context.setLog(res[res.length-i].result);
+        }
+      });
   }
 
   handleOperatorButtonPress = (oper) => {
@@ -35,11 +61,17 @@ export default class Calculator extends Component{
   }
 
   handleClickEquals = () => {
-    this.setState({showingResult: true});
-    try {
-      this.setState({display: `${math.eval(this.state.display)}`});
-    } catch (error) {
-      this.setState({error: 'Oof, that\'s invalid syntax'});
+    if(this.state.display === ''){
+      // do nothing
+    }else 
+    {
+      this.setState({showingResult: true});
+      try {
+        socket.emit('new_calculation', `${this.state.display}=${math.eval(this.state.display)}`);
+        this.setState({display: `${math.eval(this.state.display)}`});
+      } catch (error) {
+        this.setState({error: 'Ouch, that\'s invalid syntax. Please try again'});
+      }
     }
   }
 
@@ -58,12 +90,16 @@ export default class Calculator extends Component{
       e.key === '7' ||
       e.key === '8' ||
       e.key === '9' ||
+      e.key === '0'
+    ){
+      this.handleNumberButtonPress(e.key);
+    } else if(
       e.key === '/' ||
       e.key === '*' ||
       e.key === '-' ||
       e.key === '+'
     ){
-      this.setState({display: `${this.state.display}${e.key}`});
+      this.handleOperatorButtonPress(e.key);
     } else if(
       e.key === 'Enter'
     ){
@@ -74,6 +110,10 @@ export default class Calculator extends Component{
     ){
       this.handleClickClear();
     }
+  }
+
+  testButton = () => {
+    socket.emit('test', `${this.state.display}=${math.eval(this.state.display)}`);
   }
 
   render(){
@@ -106,12 +146,15 @@ export default class Calculator extends Component{
         <div className='row'>
           <button onClick={() => this.handleNumberButtonPress(0)}>0</button>
           <button onClick={() => this.handleOperatorButtonPress('.')}>.</button>
-          <button onClick={() => this.handleClickEquals('=')}>=</button>
+          <button onClick={() => this.handleClickEquals()}>=</button>
           <button onClick={() => this.handleOperatorButtonPress('+')}>+</button>
         </div>
         <div>
           <button className='button' id='clear' onClick={this.handleClickClear}>Clear</button>
         </div>
+        {/* <div>
+          <button className='button' id='clear' onClick={this.testButton}>test</button>
+        </div> */}
       </div>
     );
   }
