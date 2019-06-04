@@ -3,6 +3,7 @@ import './Calculator.css';
 import * as math from 'mathjs';
 import Context from '../Context';
 import io from 'socket.io-client';
+import config from '../config';
 let socket;
 
 export default class Calculator extends Component{
@@ -17,20 +18,15 @@ export default class Calculator extends Component{
   componentDidMount(){
     const mountContext = this.context;
     document.getElementById('calculator-container').focus();
-    socket = io('localhost:8000');
+    socket = io(config.API);
     socket.on('new_calculation_blast', function(calculation) {
       mountContext.setLog(calculation);
-    });
-    socket.on('test_reply', function(message) {
-      // logsService.insertlog
-      console.log('Got a reply');
-      console.log(message);
     });
     this.getLogs();
   }
 
   getLogs = () => {
-    return fetch('http://localhost:8000/api/logs')
+    return fetch(`${config.API}/api/logs`)
       .then(res => res.json())
       .then(res => {
         for(let i = 1; i <= res.length; i++){
@@ -112,10 +108,6 @@ export default class Calculator extends Component{
     }
   }
 
-  testButton = () => {
-    socket.emit('test', `${this.state.display}=${math.eval(this.state.display)}`);
-  }
-
   render(){
     return (
       <div id='calculator-container' onKeyDown={(e) => this.handleKeyPress(e)} tabIndex='0' focus={'true'}>
@@ -152,9 +144,6 @@ export default class Calculator extends Component{
         <div>
           <button className='button' id='clear' onClick={this.handleClickClear}>Clear</button>
         </div>
-        {/* <div>
-          <button className='button' id='clear' onClick={this.testButton}>test</button>
-        </div> */}
       </div>
     );
   }
