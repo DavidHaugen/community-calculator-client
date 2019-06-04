@@ -9,7 +9,7 @@ import openSocket from 'socket.io-client';
 export default class App extends Component {
   static contextType = Context
 
-  socket = openSocket('http://localhost:8000');
+  socket = openSocket('https://community-calculator.herokuapp.com/');
 
   componentDidMount(){
   }

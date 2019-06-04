@@ -18,7 +18,7 @@ export default class Calculator extends Component{
   componentDidMount(){
     const mountContext = this.context;
     document.getElementById('calculator-container').focus();
-    socket = io(config.API);
+    socket = io('community-calculator.herokuapp.com/');
     socket.on('new_calculation_blast', function(calculation) {
       mountContext.setLog(calculation);
     });
@@ -26,7 +26,7 @@ export default class Calculator extends Component{
   }
 
   getLogs = () => {
-    return fetch(`${config.API}/api/logs`)
+    return fetch(`${config.API}api/logs`)
       .then(res => res.json())
       .then(res => {
         for(let i = 1; i <= res.length; i++){
